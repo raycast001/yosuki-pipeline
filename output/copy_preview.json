@@ -1,0 +1,236 @@
+{
+  "us": {
+    "sax_signature": {
+      "tagline": "Own the stage",
+      "cta": "Step Into the Spotlight",
+      "series_title": "Signature Series Saxophone"
+    },
+    "piano_grand": {
+      "tagline": "Crafted for Generations",
+      "cta": "Begin Your Legacy Today",
+      "series_title": "Savant Series Piano"
+    },
+    "piano_upright": {
+      "tagline": "Crafted for Generations",
+      "cta": "Begin Your Legacy Today",
+      "series_title": "Savant Series Piano"
+    },
+    "piano_digital": {
+      "tagline": "Crafted for Generations",
+      "cta": "Begin Your Legacy Today",
+      "series_title": "Savant Series Piano"
+    },
+    "guitar_paulie_black": {
+      "tagline": "Play Loud",
+      "cta": "Unleash Every Note",
+      "series_title": "Paulie Series Guitar"
+    },
+    "guitar_paulie_blueburst": {
+      "tagline": "Play Loud",
+      "cta": "Unleash Every Note",
+      "series_title": "Paulie Series Guitar"
+    },
+    "guitar_sanjose_black": {
+      "tagline": "Play Loud",
+      "cta": "Unleash Every Note",
+      "series_title": "San Jose SJ Series Guitar"
+    },
+    "guitar_sanjose_blueburst": {
+      "tagline": "Play Loud",
+      "cta": "Unleash Every Note",
+      "series_title": "San Jose SJ Series Guitar"
+    },
+    "guitar_stratoblaster_black": {
+      "tagline": "Play Loud",
+      "cta": "Unleash Every Note",
+      "series_title": "Stratoblaster Series Guitar"
+    },
+    "guitar_stratoblaster_blueburst": {
+      "tagline": "Play Loud",
+      "cta": "Unleash Every Note",
+      "series_title": "Stratoblaster Series Guitar"
+    }
+  },
+  "intl": {
+    "sax_signature_JP": {
+      "key": "sax_JP",
+      "tagline": "舞台を、己のものに",
+      "series_title": "サクソフォンシリーズ",
+      "cta": "檜舞台へ、今こそ"
+    },
+    "piano_grand_JP": {
+      "key": "piano_JP",
+      "tagline": "世代を超える、匠の一台",
+      "series_title": "ピアノシリーズ",
+      "cta": "受け継ぐ音を、今日から"
+    },
+    "piano_upright_JP": {
+      "key": "piano_JP",
+      "tagline": "世代を超える、匠の一台",
+      "series_title": "ピアノシリーズ",
+      "cta": "受け継ぐ音を、今日から"
+    },
+    "piano_digital_JP": {
+      "key": "piano_JP",
+      "tagline": "世代を超える、匠の一台",
+      "series_title": "ピアノシリーズ",
+      "cta": "受け継ぐ音を、今日から"
+    },
+    "guitar_paulie_black_JP": {
+      "key": "guitar_JP",
+      "tagline": "音よ、響き渡れ",
+      "series_title": "ギターシリーズ",
+      "cta": "すべての音を解き放て"
+    },
+    "guitar_paulie_blueburst_JP": {
+      "key": "guitar_JP",
+      "tagline": "音よ、響き渡れ",
+      "series_title": "ギターシリーズ",
+      "cta": "すべての音を解き放て"
+    },
+    "guitar_sanjose_black_JP": {
+      "key": "guitar_JP",
+      "tagline": "音よ、響き渡れ",
+      "series_title": "ギターシリーズ",
+      "cta": "すべての音を解き放て"
+    },
+    "guitar_sanjose_blueburst_JP": {
+      "key": "guitar_JP",
+      "tagline": "音よ、響き渡れ",
+      "series_title": "ギターシリーズ",
+      "cta": "すべての音を解き放て"
+    },
+    "guitar_stratoblaster_black_JP": {
+      "key": "guitar_JP",
+      "tagline": "音よ、響き渡れ",
+      "series_title": "ギターシリーズ",
+      "cta": "すべての音を解き放て"
+    },
+    "guitar_stratoblaster_blueburst_JP": {
+      "key": "guitar_JP",
+      "tagline": "音よ、響き渡れ",
+      "series_title": "ギターシリーズ",
+      "cta": "すべての音を解き放て"
+    },
+    "sax_signature_DE": {
+      "key": "sax_DE",
+      "tagline": "Die Bühne gehört dir",
+      "series_title": "Saxophon-Serie",
+      "cta": "Ins Rampenlicht treten"
+    },
+    "piano_grand_DE": {
+      "key": "piano_DE",
+      "tagline": "Gefertigt für Generationen",
+      "series_title": "Klavier-Serie",
+      "cta": "Ihr Vermächtnis beginnt"
+    },
+    "piano_upright_DE": {
+      "key": "piano_DE",
+      "tagline": "Gefertigt für Generationen",
+      "series_title": "Klavier-Serie",
+      "cta": "Ihr Vermächtnis beginnt"
+    },
+    "piano_digital_DE": {
+      "key": "piano_DE",
+      "tagline": "Gefertigt für Generationen",
+      "series_title": "Klavier-Serie",
+      "cta": "Ihr Vermächtnis beginnt"
+    },
+    "guitar_paulie_black_DE": {
+      "key": "guitar_DE",
+      "tagline": "Spiel laut",
+      "series_title": "Gitarren-Serie",
+      "cta": "Jeden Ton entfesseln"
+    },
+    "guitar_paulie_blueburst_DE": {
+      "key": "guitar_DE",
+      "tagline": "Spiel laut",
+      "series_title": "Gitarren-Serie",
+      "cta": "Jeden Ton entfesseln"
+    },
+    "guitar_sanjose_black_DE": {
+      "key": "guitar_DE",
+      "tagline": "Spiel laut",
+      "series_title": "Gitarren-Serie",
+      "cta": "Jeden Ton entfesseln"
+    },
+    "guitar_sanjose_blueburst_DE": {
+      "key": "guitar_DE",
+      "tagline": "Spiel laut",
+      "series_title": "Gitarren-Serie",
+      "cta": "Jeden Ton entfesseln"
+    },
+    "guitar_stratoblaster_black_DE": {
+      "key": "guitar_DE",
+      "tagline": "Spiel laut",
+      "series_title": "Gitarren-Serie",
+      "cta": "Jeden Ton entfesseln"
+    },
+    "guitar_stratoblaster_blueburst_DE": {
+      "key": "guitar_DE",
+      "tagline": "Spiel laut",
+      "series_title": "Gitarren-Serie",
+      "cta": "Jeden Ton entfesseln"
+    },
+    "sax_signature_BR": {
+      "key": "sax_BR",
+      "tagline": "O palco é seu",
+      "series_title": "Série Saxofone",
+      "cta": "Entre em cena agora"
+    },
+    "piano_grand_BR": {
+      "key": "piano_BR",
+      "tagline": "Feito para gerações",
+      "series_title": "Série Piano",
+      "cta": "Comece seu legado hoje"
+    },
+    "piano_upright_BR": {
+      "key": "piano_BR",
+      "tagline": "Feito para gerações",
+      "series_title": "Série Piano",
+      "cta": "Comece seu legado hoje"
+    },
+    "piano_digital_BR": {
+      "key": "piano_BR",
+      "tagline": "Feito para gerações",
+      "series_title": "Série Piano",
+      "cta": "Comece seu legado hoje"
+    },
+    "guitar_paulie_black_BR": {
+      "key": "guitar_BR",
+      "tagline": "Toque com alma",
+      "series_title": "Série Guitarra",
+      "cta": "Liberte cada nota"
+    },
+    "guitar_paulie_blueburst_BR": {
+      "key": "guitar_BR",
+      "tagline": "Toque com alma",
+      "series_title": "Série Guitarra",
+      "cta": "Liberte cada nota"
+    },
+    "guitar_sanjose_black_BR": {
+      "key": "guitar_BR",
+      "tagline": "Toque com alma",
+      "series_title": "Série Guitarra",
+      "cta": "Liberte cada nota"
+    },
+    "guitar_sanjose_blueburst_BR": {
+      "key": "guitar_BR",
+      "tagline": "Toque com alma",
+      "series_title": "Série Guitarra",
+      "cta": "Liberte cada nota"
+    },
+    "guitar_stratoblaster_black_BR": {
+      "key": "guitar_BR",
+      "tagline": "Toque com alma",
+      "series_title": "Série Guitarra",
+      "cta": "Liberte cada nota"
+    },
+    "guitar_stratoblaster_blueburst_BR": {
+      "key": "guitar_BR",
+      "tagline": "Toque com alma",
+      "series_title": "Série Guitarra",
+      "cta": "Liberte cada nota"
+    }
+  }
+}

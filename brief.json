@@ -1,0 +1,227 @@
+{
+  "campaign_name": "Find Your Sound",
+  "brand": "Yosuki Musical Instrument Corporation",
+  "brand_pillars": "Japanese craftsmanship, professional-grade performance, emotional connection to music, premium build quality",
+
+  "markets": [
+    {
+      "id": "US",
+      "language": "English",
+      "tone": "Aspirational, bold, expressive, in-your-face"
+    },
+    {
+      "id": "JP",
+      "language": "Japanese",
+      "tone": "Respectful, refined, craftsmanship-focused",
+      "visual_culture": "Japanese minimalist aesthetic, soft diffused natural light, muted earth tones and cool greys, generous negative space, refined textures such as dark lacquer, washi paper, and polished wood, understated elegance, no clutter"
+    },
+    {
+      "id": "DE",
+      "language": "German",
+      "tone": "Precision, engineering excellence, serious. Shorter phrasing due to compound words.",
+      "visual_culture": "Germanic precision aesthetic, clean architectural lines, cool neutral tones of steel and concrete, sharp controlled lighting with hard shadows, structured industrial minimalism, Bauhaus-inspired composition, technical clarity"
+    },
+    {
+      "id": "BR",
+      "language": "Brazilian Portuguese",
+      "tone": "Emotional, energetic, expressive",
+      "visual_culture": "Brazilian visual energy, warm saturated tropical light, vibrant golden and amber tones, lush organic textures, expressive dynamic composition, rich contrast between deep shadows and glowing highlights, emotional warmth and vitality"
+    }
+  ],
+
+  "copy_constraints": {
+    "tagline_max_words": 6,
+    "cta_max_words": 4,
+    "no_line_breaks": true,
+    "note": "German copy may need shorter phrasing due to compound words. Japanese taglines should be concise — 6 short words or fewer."
+  },
+
+  "families": [
+    {
+      "id": "sax",
+      "label": "Saxophone",
+      "us_tagline": "Own the stage",
+      "product_ids": ["sax_signature"]
+    },
+    {
+      "id": "piano",
+      "label": "Piano",
+      "us_tagline": "Crafted for Generations",
+      "product_ids": ["piano_grand", "piano_upright", "piano_digital"]
+    },
+    {
+      "id": "guitar",
+      "label": "Guitar",
+      "us_tagline": "Play Loud",
+      "product_ids": [
+        "guitar_paulie_black", "guitar_paulie_blueburst",
+        "guitar_sanjose_black", "guitar_sanjose_blueburst",
+        "guitar_stratoblaster_black", "guitar_stratoblaster_blueburst"
+      ]
+    }
+  ],
+
+  "products": [
+
+    {
+      "product_id": "sax_signature",
+      "series": "Signature Series Saxophone",
+      "model": "Signature Sax",
+      "color": null,
+      "key_message": "Own the stage",
+      "audience": "Music students, jazz musicians, urban creatives, age 18-35",
+      "psychographics": "Expressive, passionate about performance, live gigs and festivals",
+      "scene": "Intimate jazz club, warm golden lighting, haze and smoke, spotlit performer area",
+      "vibe": "Confident, Expressive, Emotional, Impactful Performance",
+      "visual_motifs": "Stage lights, velvet curtains, close-up brass or chrome reflections, bokeh",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/saxophone/sax1.png",
+      "product_image": "assets/product_cutouts/sax1_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    },
+
+    {
+      "product_id": "piano_grand",
+      "series": "Savant Series Piano",
+      "model": "Grand Piano",
+      "color": null,
+      "key_message": "Crafted for Generations",
+      "audience": "Professional pianists, conservatory students, high-end home buyers, age 25-55",
+      "psychographics": "Refined taste, values heritage and legacy, seeks instruments that last a lifetime",
+      "scene": "Grand performance hall, marble floors, wood panelling, natural daylight through tall windows",
+      "vibe": "Refined, Timeless, Emotional, Prestige",
+      "visual_motifs": "Soft shadows, slow light movement, close-up keys and craftsmanship detail, architectural depth",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/pianos/piano1.png",
+      "product_image": "assets/product_cutouts/piano1_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9"]
+    },
+
+    {
+      "product_id": "piano_upright",
+      "series": "Savant Series Piano",
+      "model": "Upright Piano",
+      "color": null,
+      "key_message": "Crafted for Generations",
+      "audience": "Home musicians, music teachers, families, age 30-60",
+      "psychographics": "Warmth, tradition, music as part of daily family life",
+      "scene": "Warm living room or music studio, soft evening light, timeless domestic setting",
+      "vibe": "Warm, Intimate, Heritage, Enduring",
+      "visual_motifs": "Warm wood tones, soft lamp light, sheet music, quiet elegance",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/pianos/piano2.png",
+      "product_image": "assets/product_cutouts/piano2_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9"]
+    },
+
+    {
+      "product_id": "piano_digital",
+      "series": "Savant Series Piano",
+      "model": "Digital Piano",
+      "color": null,
+      "key_message": "Professional Sound, Modern Freedom",
+      "audience": "Producers, bedroom musicians, gigging pianists, age 18-40",
+      "psychographics": "Tech-forward, values versatility, creates music anywhere",
+      "scene": "Sleek modern studio, dark background, subtle LED accent lighting, clean and minimal",
+      "vibe": "Modern, Versatile, Precise, Forward-thinking",
+      "visual_motifs": "Dark studio environment, accent glow, crisp product silhouette, tech aesthetic",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/pianos/piano3.png",
+      "product_image": "assets/product_cutouts/piano3_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9"]
+    },
+
+    {
+      "product_id": "guitar_paulie_black",
+      "series": "Paulie Series Guitar",
+      "model": "Paulie Single-Cut",
+      "color": "Black",
+      "key_message": "Built to Perform",
+      "audience": "Rock and blues guitarists, working musicians, collectors, age 20-45",
+      "psychographics": "Serious about tone, values build quality, performs live regularly",
+      "scene": "Industrial warehouse, concrete walls, neon accent lights, amplifier stacks in background",
+      "vibe": "Raw, Powerful, Intense, Authentic",
+      "visual_motifs": "High contrast lighting, dark shadows, neon glow, concrete texture, guitar amps",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/guitars/guitar1-a.png",
+      "product_image": "assets/product_cutouts/guitar1a_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    },
+
+    {
+      "product_id": "guitar_paulie_blueburst",
+      "series": "Paulie Series Guitar",
+      "model": "Paulie Single-Cut",
+      "color": "Blue-burst",
+      "key_message": "Built to Perform",
+      "audience": "Rock and blues guitarists, working musicians, collectors, age 20-45",
+      "psychographics": "Serious about tone, values build quality, performs live regularly",
+      "scene": "Industrial warehouse, concrete walls, neon blue accent lights, amplifier stacks in background",
+      "vibe": "Raw, Powerful, Intense, Authentic",
+      "visual_motifs": "High contrast lighting, dark shadows, blue neon glow, concrete texture, guitar amps",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/guitars/guitar1-b.png",
+      "product_image": "assets/product_cutouts/guitar1b_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    },
+
+    {
+      "product_id": "guitar_sanjose_black",
+      "series": "San Jose SJ Series Guitar",
+      "model": "San Jose SJ Double-Cut",
+      "color": "Black",
+      "key_message": "Play Without Limits",
+      "audience": "Versatile guitarists, session musicians, genre-benders, age 18-40",
+      "psychographics": "Loves versatility, plays multiple genres, values feel and responsiveness",
+      "scene": "Industrial warehouse, concrete walls, warm amber neon lights, edgy urban energy",
+      "vibe": "Dynamic, Versatile, Energetic, Bold",
+      "visual_motifs": "Motion blur effects, dynamic lighting, urban grit, speed and energy",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/guitars/guitar2-a.png",
+      "product_image": "assets/product_cutouts/guitar2a_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    },
+
+    {
+      "product_id": "guitar_sanjose_blueburst",
+      "series": "San Jose SJ Series Guitar",
+      "model": "San Jose SJ Double-Cut",
+      "color": "Blue-burst",
+      "key_message": "Play Without Limits",
+      "audience": "Versatile guitarists, session musicians, genre-benders, age 18-40",
+      "psychographics": "Loves versatility, plays multiple genres, values feel and responsiveness",
+      "scene": "Industrial warehouse, concrete walls, cool blue neon lights, edgy urban energy",
+      "vibe": "Dynamic, Versatile, Energetic, Bold",
+      "visual_motifs": "Motion blur effects, dynamic blue lighting, urban grit, speed and energy",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/guitars/guitar2-b.png",
+      "product_image": "assets/product_cutouts/guitar2b_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    },
+
+    {
+      "product_id": "guitar_stratoblaster_black",
+      "series": "Stratoblaster Series Guitar",
+      "model": "Stratoblaster",
+      "color": "Black",
+      "key_message": "Redefine Your Sound",
+      "audience": "Lead guitarists, tone chasers, gigging pros, age 22-45",
+      "psychographics": "Obsessed with tone and sustain, uses guitar as a primary creative voice",
+      "scene": "Industrial warehouse, dark atmosphere, dramatic single spotlight, heavy amp stack silhouettes",
+      "vibe": "Commanding, Iconic, Powerful, Legendary",
+      "visual_motifs": "Dramatic spotlight, deep shadows, silhouette composition, raw power aesthetic",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/guitars/guitar3-a.png",
+      "product_image": "assets/product_cutouts/guitar3a_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    },
+
+    {
+      "product_id": "guitar_stratoblaster_blueburst",
+      "series": "Stratoblaster Series Guitar",
+      "model": "Stratoblaster",
+      "color": "Blue-burst",
+      "key_message": "Redefine Your Sound",
+      "audience": "Lead guitarists, tone chasers, gigging pros, age 22-45",
+      "psychographics": "Obsessed with tone and sustain, uses guitar as a primary creative voice",
+      "scene": "Industrial warehouse, dark atmosphere, dramatic blue spotlight, heavy amp stack silhouettes",
+      "vibe": "Commanding, Iconic, Powerful, Legendary",
+      "visual_motifs": "Dramatic blue spotlight, deep shadows, silhouette composition, raw power aesthetic",
+      "source_image": "F:/Adobe_FDE Take-Home/Assets/fde_asset_bundle/guitars/guitar3-b.png",
+      "product_image": "assets/product_cutouts/guitar3b_cutout.png",
+      "aspect_ratios": ["billboard_970x250", "16x9", "1x1"]
+    }
+
+  ]
+}

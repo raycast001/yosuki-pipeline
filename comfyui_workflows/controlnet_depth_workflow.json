@@ -1,0 +1,215 @@
+{
+  "_README": {
+    "purpose": "Flux depth ControlNet workflow — uses a C4D render as a spatial reference to guide background generation. The depth map extracted from the C4D scene tells Flux where the platform, stage floor, and negative space are, so the generated background matches the scene composition. This is the 'digital twin' approach: the 3D stage geometry informs the AI image rather than generating a background blind.",
+
+    "required_setup": [
+      "1. Download Flux depth ControlNet model (XLabs-AI):",
+      "   URL: https://huggingface.co/XLabs-AI/flux-controlnet-depth-v3",
+      "   File: flux-depth-controlnet-v3.safetensors",
+      "   Place in: G:/ComfyUI/models/controlnet/",
+      "",
+      "2. Install ComfyUI-ControlNet-Aux custom nodes (for the depth preprocessor):",
+      "   Open ComfyUI > Manager > Install Custom Nodes",
+      "   Search: 'ComfyUI-ControlNet-Aux'  (by Fannovel16)",
+      "   Install, then restart ComfyUI"
+    ],
+
+    "node_map": {
+      "6":  "CLIPTextEncode    — positive scene description prompt",
+      "7":  "CLIPTextEncode    — empty negative (Flux doesn't use negatives, but ControlNetApply needs the slot)",
+      "8":  "VAEDecode         — converts latent to final pixel image",
+      "9":  "SaveImage         — saves output PNG (filename_prefix injected by Python)",
+      "10": "VAELoader         — loads ae.safetensors",
+      "11": "DualCLIPLoader    — loads clip_l + t5xxl for Flux",
+      "12": "UNETLoader        — loads flux1-dev.safetensors",
+      "13": "SamplerCustomAdvanced — runs the generation",
+      "16": "KSamplerSelect    — euler sampler",
+      "17": "BasicScheduler    — steps + denoise settings",
+      "22": "BasicGuider       — takes conditioning from ControlNetApply (node 33), not directly from CLIP",
+      "25": "RandomNoise       — seed (injected by Python for unique results each run)",
+      "27": "EmptySD3LatentImage — canvas size (1920x1080 for 16:9)",
+      "30": "LoadImage         — the C4D reference render (filename injected by Python after upload)",
+      "31": "ControlNetLoader  — loads flux-depth-controlnet-v3.safetensors",
+      "32": "AIO_Preprocessor  — extracts depth map from C4D render using DepthAnythingV2",
+      "33": "ControlNetApplyAdvanced — applies depth guidance to the Flux conditioning"
+    },
+
+    "how_it_works": "The C4D render goes into LoadImage(30) → AIO_Preprocessor(32) extracts a depth map (grayscale image showing what is close vs far in the scene) → ControlNetApplyAdvanced(33) uses that depth map to steer the Flux generation so it respects the spatial composition of the stage. The output background will match the platform depth, perspective, and negative space layout of your Cinema 4D scene.",
+
+    "strength_guide": "The 'strength' value in node 33 controls how tightly the output follows the C4D depth reference. 0.5 = loose reference (AI has more freedom), 0.75 = strong guidance (closely matches stage layout), 1.0 = very constrained. 0.65 is a good starting point.",
+
+    "python_injection_fields": {
+      "node_6_text":            "The scene description prompt (built from brief)",
+      "node_9_filename_prefix": "Unique job prefix so Python can find the output",
+      "node_17_steps":          "Generation steps (default 25)",
+      "node_25_noise_seed":     "Random seed (Python injects a UUID-based seed)",
+      "node_27_width":          "Image width (1920 for 16:9)",
+      "node_27_height":         "Image height (1080 for 16:9)",
+      "node_30_image":          "Filename of uploaded C4D render (Python uploads it first)",
+      "node_31_control_net_name": "ControlNet model filename",
+      "node_33_strength":       "How tightly to follow the depth reference (0.5–0.85)"
+    }
+  },
+
+  "6": {
+    "inputs": {
+      "text": "intimate jazz club interior, cool blue ambient stage lighting, dark atmospheric background, smooth polished floor reflection, subtle bokeh depth of field, cinematic photography, premium feel, no saxophone, no instruments",
+      "clip": ["11", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive Prompt" }
+  },
+
+  "7": {
+    "inputs": {
+      "text": "",
+      "clip": ["11", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Negative Prompt (empty — Flux does not use negative prompts)" }
+  },
+
+  "8": {
+    "inputs": {
+      "samples": ["13", 0],
+      "vae": ["10", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+
+  "9": {
+    "inputs": {
+      "filename_prefix": "yosuki_sax_controlnet",
+      "images": ["8", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  },
+
+  "10": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "VAE Loader" }
+  },
+
+  "11": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp16.safetensors",
+      "type": "flux"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": { "title": "CLIP Loader (Flux)" }
+  },
+
+  "12": {
+    "inputs": {
+      "unet_name": "flux1-dev.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Flux Model Loader" }
+  },
+
+  "13": {
+    "inputs": {
+      "noise":         ["25", 0],
+      "guider":        ["22", 0],
+      "sampler":       ["16", 0],
+      "sigmas":        ["17", 0],
+      "latent_image":  ["27", 0]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": { "title": "Sampler" }
+  },
+
+  "16": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": { "title": "Sampler Select" }
+  },
+
+  "17": {
+    "inputs": {
+      "scheduler": "simple",
+      "steps":     25,
+      "denoise":   1.0,
+      "model":     ["12", 0]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": { "title": "Scheduler" }
+  },
+
+  "22": {
+    "inputs": {
+      "model":        ["12", 0],
+      "conditioning": ["33", 0]
+    },
+    "class_type": "BasicGuider",
+    "_meta": { "title": "Guider — conditioning now comes from ControlNet (node 33), not directly from CLIP" }
+  },
+
+  "25": {
+    "inputs": {
+      "noise_seed": 42
+    },
+    "class_type": "RandomNoise",
+    "_meta": { "title": "Random Noise (Seed)" }
+  },
+
+  "27": {
+    "inputs": {
+      "width":      1920,
+      "height":     1080,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": { "title": "Empty Latent (1920x1080 for 16:9)" }
+  },
+
+  "30": {
+    "inputs": {
+      "image":  "c4d_reference.png",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": { "title": "C4D Reference Render — filename injected by Python after upload" }
+  },
+
+  "31": {
+    "inputs": {
+      "control_net_name": "flux-depth-controlnet-v3.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": { "title": "Flux Depth ControlNet — download from XLabs-AI on HuggingFace" }
+  },
+
+  "32": {
+    "inputs": {
+      "preprocessor": "DepthAnythingV2Preprocessor",
+      "resolution":   1024,
+      "image":        ["30", 0]
+    },
+    "class_type": "AIO_Preprocessor",
+    "_meta": { "title": "Depth Preprocessor — requires ComfyUI-ControlNet-Aux custom nodes" }
+  },
+
+  "33": {
+    "inputs": {
+      "positive":      ["6",  0],
+      "negative":      ["7",  0],
+      "control_net":   ["31", 0],
+      "image":         ["32", 0],
+      "strength":      0.65,
+      "start_percent": 0.0,
+      "end_percent":   0.85
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": { "title": "Apply Depth ControlNet — strength 0.65 balances scene fidelity vs AI freedom" }
+  }
+}

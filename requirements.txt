@@ -1,0 +1,17 @@
+# Yosuki Pipeline — Python Dependencies
+# Install with: pip install -r requirements.txt
+#
+# Note: rembg + onnxruntime can take a few minutes to install and will
+# download an AI model (~170 MB) on first use. This is normal.
+
+anthropic>=0.25.0                   # Claude API — generates all copy
+rembg>=2.0.50                       # Removes white/gray backgrounds from product PNGs
+Pillow>=10.0.0                      # Image processing (used by rembg + our scripts)
+requests>=2.31.0                    # ComfyUI API calls
+jsonschema>=4.21.0                  # Validates brief.json structure before running
+python-dotenv>=1.0.0                # Loads API keys from .env file
+onnxruntime>=1.16.0                 # Required by rembg (the AI background removal model)
+google-api-python-client>=2.100.0  # Google Drive upload
+google-auth-oauthlib>=1.1.0        # Google OAuth login flow
+tqdm>=4.66.0                        # Progress bars in the terminal
+streamlit>=1.35.0                   # Pipeline dashboard (run: streamlit run dashboard.py)

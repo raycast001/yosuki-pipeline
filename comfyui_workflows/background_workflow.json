@@ -1,0 +1,102 @@
+{
+  "6": {
+    "inputs": {
+      "text": "a beautiful landscape at golden hour, cinematic, detailed",
+      "clip": ["11", 0]
+    },
+    "class_type": "CLIPTextEncode",
+    "_meta": { "title": "Positive Prompt" }
+  },
+  "8": {
+    "inputs": {
+      "samples": ["13", 0],
+      "vae": ["10", 0]
+    },
+    "class_type": "VAEDecode",
+    "_meta": { "title": "VAE Decode" }
+  },
+  "9": {
+    "inputs": {
+      "filename_prefix": "comfyui_ae",
+      "images": ["8", 0]
+    },
+    "class_type": "SaveImage",
+    "_meta": { "title": "Save Image" }
+  },
+  "10": {
+    "inputs": {
+      "vae_name": "ae.safetensors"
+    },
+    "class_type": "VAELoader",
+    "_meta": { "title": "VAE Loader" }
+  },
+  "11": {
+    "inputs": {
+      "clip_name1": "clip_l.safetensors",
+      "clip_name2": "t5xxl_fp16.safetensors",
+      "type": "flux"
+    },
+    "class_type": "DualCLIPLoader",
+    "_meta": { "title": "CLIP Loader (Flux)" }
+  },
+  "12": {
+    "inputs": {
+      "unet_name": "flux1-dev.safetensors",
+      "weight_dtype": "default"
+    },
+    "class_type": "UNETLoader",
+    "_meta": { "title": "Flux Model Loader" }
+  },
+  "13": {
+    "inputs": {
+      "noise": ["25", 0],
+      "guider": ["22", 0],
+      "sampler": ["16", 0],
+      "sigmas": ["17", 0],
+      "latent_image": ["27", 0]
+    },
+    "class_type": "SamplerCustomAdvanced",
+    "_meta": { "title": "Sampler" }
+  },
+  "16": {
+    "inputs": {
+      "sampler_name": "euler"
+    },
+    "class_type": "KSamplerSelect",
+    "_meta": { "title": "Sampler Select" }
+  },
+  "17": {
+    "inputs": {
+      "scheduler": "simple",
+      "steps": 20,
+      "denoise": 1.0,
+      "model": ["12", 0]
+    },
+    "class_type": "BasicScheduler",
+    "_meta": { "title": "Scheduler" }
+  },
+  "22": {
+    "inputs": {
+      "model": ["12", 0],
+      "conditioning": ["6", 0]
+    },
+    "class_type": "BasicGuider",
+    "_meta": { "title": "Guider" }
+  },
+  "25": {
+    "inputs": {
+      "noise_seed": 42
+    },
+    "class_type": "RandomNoise",
+    "_meta": { "title": "Random Noise (Seed)" }
+  },
+  "27": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptySD3LatentImage",
+    "_meta": { "title": "Empty Latent (1024x1024)" }
+  }
+}

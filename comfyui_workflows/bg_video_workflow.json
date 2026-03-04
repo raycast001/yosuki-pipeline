@@ -1,0 +1,131 @@
+{
+  "_comment": "WAN 2.2 Image-to-Video workflow for animating static background images.",
+  "_comment2": "Takes a still PNG background and generates ~5 seconds of gentle ambient motion.",
+  "_comment3": "Node IDs that get modified at runtime by 02b_generate_bg_videos.py: 5, 6, 8, 9, 11",
+
+  "1": {
+    "class_type": "WanVideoModelLoader",
+    "inputs": {
+      "model": "wan2.2_i2v_low_noise_14B_fp8_scaled.safetensors",
+      "base_precision": "bf16",
+      "quantization": "fp8_e4m3fn_scaled",
+      "load_device": "main_device"
+    }
+  },
+
+  "2": {
+    "class_type": "WanVideoVAELoader",
+    "inputs": {
+      "model_name": "wan_2.1_vae.safetensors",
+      "precision": "bf16"
+    }
+  },
+
+  "3": {
+    "class_type": "LoadWanVideoT5TextEncoder",
+    "inputs": {
+      "model_name": "umt5_xxl_fp16.safetensors",
+      "precision": "bf16"
+    }
+  },
+
+  "4": {
+    "class_type": "CLIPVisionLoader",
+    "inputs": {
+      "clip_name": "sigclip_vision_patch14_384.safetensors"
+    }
+  },
+
+  "5": {
+    "_comment": "Runtime: image is set to the uploaded background PNG filename",
+    "class_type": "LoadImage",
+    "inputs": {
+      "image": "PLACEHOLDER_IMAGE"
+    }
+  },
+
+  "6": {
+    "_comment": "Runtime: positive_prompt is set to the scene description + motion suffix",
+    "class_type": "WanVideoTextEncode",
+    "inputs": {
+      "positive_prompt": "PLACEHOLDER_POSITIVE_PROMPT",
+      "negative_prompt": "text, watermark, logo, person, face, hands, body, harsh movement, flickering, distortion, blur, artifacts, jump cut, new subject, scene change, different location",
+      "t5": ["3", 0],
+      "force_offload": true
+    }
+  },
+
+  "7": {
+    "class_type": "WanVideoClipVisionEncode",
+    "inputs": {
+      "clip_vision": ["4", 0],
+      "image_1": ["5", 0],
+      "strength_1": 1.0,
+      "strength_2": 1.0,
+      "crop": "center",
+      "combine_embeds": "average",
+      "force_offload": true
+    }
+  },
+
+  "8": {
+    "_comment": "Runtime: width and height are set based on the ratio (640x640 for 1x1)",
+    "class_type": "WanVideoImageToVideoEncode",
+    "inputs": {
+      "width": 640,
+      "height": 640,
+      "num_frames": 81,
+      "noise_aug_strength": 0.0,
+      "start_latent_strength": 1.0,
+      "end_latent_strength": 1.0,
+      "vae": ["2", 0],
+      "clip_embeds": ["7", 0],
+      "start_image": ["5", 0],
+      "force_offload": true
+    }
+  },
+
+  "9": {
+    "_comment": "Runtime: seed is randomized per job",
+    "class_type": "WanVideoSampler",
+    "inputs": {
+      "model": ["1", 0],
+      "image_embeds": ["8", 0],
+      "steps": 20,
+      "cfg": 1.0,
+      "shift": 5.0,
+      "seed": 42,
+      "scheduler": "unipc",
+      "riflex_freq_index": 0,
+      "force_offload": true,
+      "text_embeds": ["6", 0]
+    }
+  },
+
+  "10": {
+    "class_type": "WanVideoDecode",
+    "inputs": {
+      "vae": ["2", 0],
+      "samples": ["9", 0],
+      "enable_vae_tiling": false,
+      "tile_x": 272,
+      "tile_y": 272,
+      "tile_stride_x": 144,
+      "tile_stride_y": 128
+    }
+  },
+
+  "11": {
+    "_comment": "Runtime: filename_prefix is set to a unique yosuki_ prefix per job",
+    "class_type": "VHS_VideoCombine",
+    "inputs": {
+      "images": ["10", 0],
+      "frame_rate": 16,
+      "loop_count": 0,
+      "filename_prefix": "PLACEHOLDER_PREFIX",
+      "format": "video/h264-mp4",
+      "pingpong": false,
+      "save_output": true
+    }
+  }
+}
