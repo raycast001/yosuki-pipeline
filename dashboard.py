@@ -23,6 +23,7 @@ sys.path.insert(0, str(Path(__file__).parent))
 from config import (
     C4D_EXE,
     C4D_RENDERS,
+    C4D_RENDERS_DIR,
     C4D_SCRIPTS,
     COPY_PREVIEW_JSON,
     VARIANTS_JSON,
@@ -216,15 +217,16 @@ with st.expander("**STEP 2 — ComfyUI Flux Canny** — Generate scene backgroun
     with tab_us:
         st.markdown("**US backgrounds** — one per product+ratio combo (27 total)")
 
-        # Show US backgrounds grouped by scene
+        # Show one representative 16x9 per scene — same 3-column layout as international
         us_scenes = {"Saxophone": "sax_signature", "Piano": "piano_grand", "Guitar": "guitar_paulie_black"}
-        for scene_name, pid in us_scenes.items():
-            bgs = sorted(BACKGROUNDS_DIR.glob(f"{pid}_*.png"))
-            if bgs:
-                st.markdown(f"*{scene_name}*")
-                cols = st.columns(min(len(bgs), 4))
-                for col, bg in zip(cols, bgs[:4]):
-                    col.image(str(bg), caption=bg.stem, use_container_width=True)
+        scene_items = list(us_scenes.items())
+        cols = st.columns(3)
+        for col, (scene_name, pid) in zip(cols, scene_items):
+            bg = next(iter(sorted(BACKGROUNDS_DIR.glob(f"{pid}_16x9*.png"))), None)
+            if bg:
+                col.image(str(bg), caption=bg.stem, use_container_width=True)
+            else:
+                col.info(f"No {scene_name} background yet")
 
         us_product = st.text_input(
             "Product filter (optional — leave blank for all 27)",
@@ -308,32 +310,52 @@ with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", 
             cp = json.load(f)
 
         with st.expander("Current copy preview", expanded=False):
+            # Helper: collapse product IDs down to their family name (sax / piano / guitar)
+            FAMILY_LABEL = {"sax": "Saxophone", "piano": "Piano", "guitar": "Guitar"}
+            def family_of(pid):
+                for prefix, label in FAMILY_LABEL.items():
+                    if pid.startswith(prefix):
+                        return prefix, label
+                return pid, pid
+
+            # US — one row per family (all products in a family share tagline + CTA)
             st.markdown("**US** *(tagline from brief, CTA from Claude)*")
-            us_rows = []
-            for pid, c in cp.get("us", {}).items():
-                us_rows.append({
-                    "Product": pid,
-                    "Tagline": c.get("tagline", ""),
-                    "CTA": c.get("cta", ""),
-                })
+            us_data = cp.get("us", {})
+            seen_us, us_rows = set(), []
+            for pid, c in us_data.items():
+                fkey, flabel = family_of(pid)
+                if fkey not in seen_us:
+                    seen_us.add(fkey)
+                    us_rows.append({
+                        "Scene":   flabel,
+                        "Tagline": c.get("tagline", ""),
+                        "CTA":     c.get("cta", ""),
+                    })
             if us_rows:
                 st.table(us_rows)
 
+            # International — one row per family per market, with EN alongside
             st.markdown("**International** *(translated from US)*")
             intl_data = cp.get("intl", {})
             for mkt_id in intl_markets:
                 st.markdown(f"*{mkt_id}*")
-                rows = []
+                seen_intl, rows = set(), []
                 for key, c in intl_data.items():
                     if key.endswith(f"_{mkt_id}"):
-                        rows.append({
-                            "Product": key.replace(f"_{mkt_id}", ""),
-                            "Tagline": c.get("tagline", ""),
-                            "Series": c.get("series_title", ""),
-                            "CTA": c.get("cta", ""),
-                        })
+                        pid = key.replace(f"_{mkt_id}", "")
+                        fkey, flabel = family_of(pid)
+                        if fkey not in seen_intl:
+                            seen_intl.add(fkey)
+                            us_c = us_data.get(pid, {})
+                            rows.append({
+                                "Scene":        flabel,
+                                "Tagline":      c.get("tagline", ""),
+                                "Tagline (EN)": us_c.get("tagline", ""),
+                                "CTA":          c.get("cta", ""),
+                                "CTA (EN)":     us_c.get("cta", ""),
+                            })
                 if rows:
-                    st.table(rows[:5])  # Show first 5 to keep it compact
+                    st.table(rows)
 
 
 # ────────────────────────────────────────────────────────────────────

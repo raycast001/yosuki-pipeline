@@ -331,6 +331,8 @@ def run(product_filter: str | None = None,
             continue
         if product_filter and v["product_id"] != product_filter:
             continue
+        if v["ratio"] != "16x9":
+            continue   # backgrounds are only needed at 16x9 — AE scales them for other ratios
         if not v.get("comfyui_prompt"):
             log.warn(f"Skipping {v['variant_id']} — no comfyui_prompt (run step 01 first)")
             continue
