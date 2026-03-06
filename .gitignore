@@ -33,6 +33,9 @@ PRESENTATION_20MIN.md
 QA_PREP.md
 WORKFLOW_REVIEW_30MIN.md
 
+# AE auto-save files (constantly cycling, not useful in git)
+ae_templates/Adobe After Effects Auto-Save/
+
 # macOS
 .DS_Store
 
