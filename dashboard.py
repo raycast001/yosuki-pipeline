@@ -212,7 +212,7 @@ with st.expander("**STEP 2 — ComfyUI Flux Canny** — Generate scene backgroun
         "from `brief.json` appended to the prompt."
     )
 
-    tab_us, tab_intl = st.tabs(["🇺🇸 US Backgrounds", "🌍 International Backgrounds"])
+    tab_us, tab_intl = st.tabs(["US", "🌍 International"])
 
     with tab_us:
         st.markdown("**US backgrounds** — one per product+ratio combo (27 total)")

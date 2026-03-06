@@ -97,11 +97,17 @@ C4D_EXE = Path(os.getenv(
 # Where C4D saves greyscale renders used as ControlNet inputs
 C4D_RENDERS_DIR = Path(os.getenv("C4D_RENDERS_DIR", "F:/Adobe_FDE Take-Home/Assets/renders"))
 
-# C4D render paths per scene — used by 02a_generate_intl_backgrounds.py as ControlNet inputs
+# C4D render paths per scene — auto-finds the newest matching file in C4D_RENDERS_DIR.
+# C4D appends an incrementing number to each render (_001, _002, etc.).
+# This way re-rendering never requires updating .env.
+def _latest_render(pattern: str) -> Path:
+    matches = sorted(C4D_RENDERS_DIR.glob(pattern), key=lambda p: p.stat().st_mtime, reverse=True)
+    return matches[0] if matches else C4D_RENDERS_DIR / pattern.replace("*", "001")
+
 C4D_RENDERS = {
-    "sax":   C4D_RENDERS_DIR / os.getenv("C4D_RENDER_SAX",   "saxophone_model1_16x9_014.png"),
-    "piano": C4D_RENDERS_DIR / os.getenv("C4D_RENDER_PIANO", "piano_grand_16x9_008.png"),
-    "guitar":C4D_RENDERS_DIR / os.getenv("C4D_RENDER_GUITAR","guitar_16x9_001.png"),
+    "sax":    _latest_render("saxophone_model1_16x9_*.png"),
+    "piano":  _latest_render("piano_grand_16x9_*.png"),
+    "guitar": _latest_render("guitar_16x9_*.png"),
 }
 
 # C4D Python scripts launched by the dashboard's "Step 1" buttons
