@@ -426,8 +426,8 @@ with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", 
             if us_rows:
                 st.table(us_rows)
 
-            # International — one row per family per market, with EN alongside
-            st.markdown("**International** *(translated from US)*")
+            # International — taglines adapted from US, CTAs written fresh per market
+            st.markdown("**International** *(taglines culturally adapted · CTAs written fresh per market)*")
             intl_data = cp.get("intl", {})
             for mkt_id in intl_markets:
                 st.markdown(f"*{mkt_id}*")
@@ -444,7 +444,7 @@ with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", 
                                 "Tagline":      c.get("tagline", ""),
                                 "Tagline (EN)": us_c.get("tagline", ""),
                                 "CTA":          c.get("cta", ""),
-                                "CTA (EN)":     us_c.get("cta", ""),
+                                "CTA (EN)":     c.get("cta_en", ""),
                             })
                 if rows:
                     st.table(rows)

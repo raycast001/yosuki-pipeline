@@ -124,63 +124,119 @@ for pid in products:
     }
 
 
-# ── CALL 2 — International copy (JP, DE, BR) ─────────────────────────────────
-# International is driven by US copy.
-# Claude translates/adapts the US tagline + CTA — it does not invent new copy.
+# ── CALL 2a — International taglines (adapted from US tagline) ───────────────
+# Taglines are adapted from the locked US tagline — same emotional idea,
+# expressed through each market's cultural lens.
 intl_markets = [m for m in brief["markets"] if m["id"] != "US"]
 
-intl_lines = []
+tagline_lines = []
+for m in intl_markets:
+    for fid, fdata in families.items():
+        tagline_lines.append(
+            f'  - key: "{fid}_{m["id"]}" | market: {m["id"]} | '
+            f'language: {m["language"]} | tone: {m["tone"]} | '
+            f'visual_culture: "{m.get("visual_culture", "")}" | '
+            f'product_line: {fdata["label"]} | '
+            f'us_tagline: "{fdata["us_tagline"]}"'
+        )
+
+tagline_prompt = f"""You are a senior copywriter for Yosuki Musical Instrument Corporation.
+Campaign: "Find Your Sound" — Spring 2026.
+Brand pillars: {brief["brand_pillars"]}
+
+Adapt each US tagline for the target market. Express the same emotional idea through
+the cultural lens of that market — how a native copywriter would say it, not a translator.
+Use the tone and visual_culture fields to guide the register and feeling.
+
+Rules:
+- tagline: max 6 words in target language.
+- series_title: adapt the product line name naturally into the target language.
+- No line breaks.
+- German: terse and precise.
+- Japanese: understated, refined, craftsmanship-forward.
+- Brazilian Portuguese: warm and expressive.
+
+Return ONLY a valid JSON array, no markdown:
+[{{"key":"...","tagline":"...","series_title":"..."}}]
+
+VARIANTS:
+{chr(10).join(tagline_lines)}"""
+
+print("Calling Claude for international taglines...")
+r2a = client.messages.create(model=CLAUDE_MODEL, max_tokens=1024,
+                               messages=[{"role": "user", "content": tagline_prompt}])
+raw2a = r2a.content[0].text.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+family_taglines = {item["key"]: item for item in json.loads(raw2a)}
+
+
+# ── CALL 2b — International CTAs (written from scratch per market) ────────────
+# CTAs are NOT adapted from US copy. They are written fresh by asking:
+# "What would a musician in this market actually respond to?"
+# The US CTA is never shown to Claude here — no anchoring, no translating.
+cta_intl_lines = []
 for m in intl_markets:
     for fid, fdata in families.items():
         rep_pid = fdata["product_ids"][0]
         rep_product = products[rep_pid]
-        intl_lines.append(
+        cta_intl_lines.append(
             f'  - key: "{fid}_{m["id"]}" | market: {m["id"]} | '
             f'language: {m["language"]} | tone: {m["tone"]} | '
+            f'visual_culture: "{m.get("visual_culture", "")}" | '
             f'product_line: {fdata["label"]} | '
-            f'us_tagline: "{fdata["us_tagline"]}" | '
-            f'us_cta: "{family_ctas[fid]}"'
+            f'product_vibe: "{rep_product["vibe"]}" | '
+            f'audience: "{rep_product["audience"]}"'
         )
 
-intl_prompt = f"""You are a senior copywriter for Yosuki Musical Instrument Corporation.
+cta_intl_prompt = f"""You are a senior copywriter for Yosuki Musical Instrument Corporation.
 Campaign: "Find Your Sound" — Spring 2026.
 Brand pillars: {brief["brand_pillars"]}
 
-The US English copy is LOCKED. Your job is to translate and culturally adapt it for each target market.
+Write a CTA for each market+product combination. Ask yourself one question:
+"What would a musician in this market actually respond to?"
+
+Write from that answer. Do not reference or adapt any other market's copy.
+Each CTA should feel like it was conceived for this market from scratch.
 
 Rules:
-- Preserve the emotional meaning of the US copy — do NOT invent new concepts.
-- The translation should feel native and natural in the target language, not word-for-word literal.
-- tagline: translate/adapt the us_tagline. Max 6 words in target language.
-- series_title: translate the product line name naturally into the target language.
-- cta: translate/adapt the us_cta. Max 4 words in target language. Action-oriented.
-- No line breaks anywhere.
-- German: use shorter phrasing to account for longer compound words.
-- Japanese: max 6 short syllable-words or equivalent, refined and respectful tone.
+- max 4 words in target language.
+- Action-oriented and direct.
+- Must feel native — rooted in local music culture and values.
+- No line breaks.
+- German: terse, authoritative. One or two sharp words beats a sentence.
+- Japanese: precise, understated. Mastery and craft over hype.
+- Brazilian Portuguese: passionate, energetic, direct emotional trigger.
+
+Also return cta_en — a plain English translation of the CTA you wrote, so reviewers
+can understand what it means without speaking the language.
 
 Return ONLY a valid JSON array, no markdown:
-[{{"key":"...","tagline":"...","series_title":"...","cta":"..."}}]
+[{{"key":"...","cta":"...","cta_en":"..."}}]
 
-VARIANTS TO TRANSLATE:
-{chr(10).join(intl_lines)}"""
+VARIANTS:
+{chr(10).join(cta_intl_lines)}"""
 
-print("Calling Claude for international copy (JP, DE, BR) — translating from US...")
-r2 = client.messages.create(model=CLAUDE_MODEL, max_tokens=2048,
-                              messages=[{"role": "user", "content": intl_prompt}])
-raw2 = r2.content[0].text.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+print("Calling Claude for international CTAs (written fresh per market)...")
+r2b = client.messages.create(model=CLAUDE_MODEL, max_tokens=512,
+                               messages=[{"role": "user", "content": cta_intl_prompt}])
+raw2b = r2b.content[0].text.strip().lstrip("```json").lstrip("```").rstrip("```").strip()
+family_ctas_intl = {item["key"]: item for item in json.loads(raw2b)}
 
-# family+market → copy dict
-family_intl = {item["key"]: item for item in json.loads(raw2)}
 
-# Expand to per-product_id keys for apply_copy_preview.py
+# ── Merge taglines + CTAs into intl_copy ─────────────────────────────────────
 intl_copy = {}
 for m in intl_markets:
     for pid in products:
         fid = pid_to_family[pid]
-        family_key   = f"{fid}_{m['id']}"
-        product_key  = f"{pid}_{m['id']}"
-        if family_key in family_intl:
-            intl_copy[product_key] = family_intl[family_key]
+        family_key  = f"{fid}_{m['id']}"
+        product_key = f"{pid}_{m['id']}"
+        cta_item = family_ctas_intl.get(family_key, {})
+        if family_key in family_taglines:
+            intl_copy[product_key] = {
+                "tagline":      family_taglines[family_key].get("tagline", ""),
+                "series_title": family_taglines[family_key].get("series_title", ""),
+                "cta":          cta_item.get("cta", ""),
+                "cta_en":       cta_item.get("cta_en", ""),
+            }
 
 
 # ── SAVE PREVIEW (save FIRST so data isn't lost if printing fails) ────────────
