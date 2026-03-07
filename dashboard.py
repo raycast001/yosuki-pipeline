@@ -26,6 +26,7 @@ from config import (
     C4D_RENDERS_DIR,
     C4D_SCRIPTS,
     COPY_PREVIEW_JSON,
+    PRODUCT_CUTOUTS_DIR,
     VARIANTS_JSON,
 )
 
@@ -329,6 +330,41 @@ with st.expander("**STEP 2 — ComfyUI Flux Canny** — Generate scene backgroun
 
 
 # ────────────────────────────────────────────────────────────────────
+# STEP 2a — Background Removal (rembg)
+# ────────────────────────────────────────────────────────────────────
+with st.expander("**STEP 2a — Background Removal** — Remove backgrounds from product images", expanded=False):
+    st.markdown(
+        "Removes white/grey backgrounds from product PNGs using rembg (AI-based, runs locally). "
+        "Outputs transparent cutouts to `assets/product_cutouts/` for use in After Effects. "
+        "Already-processed cutouts are skipped automatically."
+    )
+
+    # The cutout filenames produced by 00_prep_assets.py
+    CUTOUT_NAMES = [
+        "sax1_cutout.png",
+        "piano1_cutout.png", "piano2_cutout.png", "piano3_cutout.png",
+        "guitar1a_cutout.png", "guitar1b_cutout.png",
+        "guitar2a_cutout.png", "guitar2b_cutout.png",
+        "guitar3a_cutout.png", "guitar3b_cutout.png",
+        "logo_cutout.png",
+    ]
+    done_cutouts    = [n for n in CUTOUT_NAMES if (PRODUCT_CUTOUTS_DIR / n).exists()]
+    missing_cutouts = [n for n in CUTOUT_NAMES if not (PRODUCT_CUTOUTS_DIR / n).exists()]
+
+    st.caption(f"{len(done_cutouts)} / {len(CUTOUT_NAMES)} cutouts ready")
+
+    if missing_cutouts:
+        st.warning(f"Missing: {', '.join(missing_cutouts)}")
+    else:
+        st.success("All product cutouts are ready.")
+
+    if st.button("▶ Run Background Removal", key="run_rembg", use_container_width=True):
+        rc, out = run_script("scripts/00_prep_assets.py")
+        show_result(rc, out)
+        st.rerun()
+
+
+# ────────────────────────────────────────────────────────────────────
 # STEP 3 — Generate Copy
 # ────────────────────────────────────────────────────────────────────
 with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", expanded=False):
@@ -480,23 +516,26 @@ st.subheader("🚀 Run Full Pipeline")
 st.caption("Runs selected steps in sequence for your chosen market.")
 
 # ── Options ────────────────────────────────────────────────────────
-fp_col1, fp_col2, fp_col3, fp_col4 = st.columns([2, 1, 1, 1])
+fp_col1, fp_col2, fp_col3, fp_col4, fp_col5 = st.columns([2, 1, 1, 1, 1])
 with fp_col1:
     fp_market = st.selectbox("Market", all_markets, key="fp_market")
 with fp_col2:
-    fp_skip_c4d  = st.checkbox("Skip C4D",     value=True,  key="fp_skip_c4d",
-                               help="Uncheck to launch Cinema 4D with the batch render script.")
+    fp_skip_c4d   = st.checkbox("Skip C4D",     value=True,  key="fp_skip_c4d",
+                                help="Uncheck to launch Cinema 4D with the batch render script.")
 with fp_col3:
-    fp_skip_bg   = st.checkbox("Skip ComfyUI", value=True,  key="fp_skip_bg",
-                               help="Uncheck to regenerate backgrounds before rendering.")
+    fp_skip_bg    = st.checkbox("Skip ComfyUI", value=True,  key="fp_skip_bg",
+                                help="Uncheck to regenerate backgrounds before rendering.")
 with fp_col4:
-    fp_skip_copy = st.checkbox("Skip Copy",    value=True,  key="fp_skip_copy",
-                               help="Uncheck to re-generate and apply copy before rendering.")
+    fp_skip_rembg = st.checkbox("Skip Rembg",   value=True,  key="fp_skip_rembg",
+                                help="Uncheck to run background removal on product images.")
+with fp_col5:
+    fp_skip_copy  = st.checkbox("Skip Copy",    value=True,  key="fp_skip_copy",
+                                help="Uncheck to re-generate and apply copy before rendering.")
 
 
 # ── Build ordered step list ────────────────────────────────────────
 # Each step is a dict — type "c4d" launches Cinema 4D, type "script" runs Python.
-def build_pipeline_steps(market, skip_c4d, skip_bg, skip_copy):
+def build_pipeline_steps(market, skip_c4d, skip_bg, skip_rembg, skip_copy):
     steps = []
     if not skip_c4d:
         steps.append({"name": "C4D Renders", "type": "c4d",
@@ -508,6 +547,9 @@ def build_pipeline_steps(market, skip_c4d, skip_bg, skip_copy):
         else:
             steps.append({"name": "ComfyUI — Intl Backgrounds", "type": "script",
                           "script": "scripts/02a_generate_intl_backgrounds.py", "args": ["--market", market]})
+    if not skip_rembg:
+        steps.append({"name": "Background Removal", "type": "script",
+                      "script": "scripts/00_prep_assets.py", "args": []})
     if not skip_copy:
         steps.append({"name": "Generate Copy Preview", "type": "script",
                       "script": "scripts/02b_generate_copy_preview.py", "args": []})
@@ -519,7 +561,7 @@ def build_pipeline_steps(market, skip_c4d, skip_bg, skip_copy):
 
 
 # ── Step preview chips (show what will run before button is pressed) ─
-preview_steps = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_copy)
+preview_steps = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_rembg, fp_skip_copy)
 if preview_steps:
     chip_cols = st.columns(len(preview_steps))
     for col, step in zip(chip_cols, preview_steps):
@@ -556,7 +598,7 @@ if run_clicked:
     # Clear any previous stop request when starting a new run
     st.session_state["pipeline_stop"] = False
 
-    steps  = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_copy)
+    steps  = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_rembg, fp_skip_copy)
     n      = len(steps)
     all_ok = True
     progress_bar = st.progress(0, text="Starting pipeline...")
