@@ -165,17 +165,43 @@ with st.expander("**STEP 1 — C4D Render** — Scene reference renders for Cont
         "giving every background the correct spatial composition."
     )
 
-    c4d_existing = {name: path for name, path in C4D_SCENES.items() if path.exists()}
-    c4d_missing  = [name for name, path in C4D_SCENES.items() if not path.exists()]
+    # Re-glob every render so the dashboard picks up new files without restarting
+    def latest_c4d_scenes() -> dict:
+        patterns = {
+            "Saxophone": "saxophone_model1_16x9_*.png",
+            "Piano":     "piano_grand_16x9_*.png",
+            "Guitar":    "guitar_16x9_*.png",
+        }
+        result = {}
+        for name, pat in patterns.items():
+            matches = sorted(C4D_RENDERS_DIR.glob(pat), key=lambda p: p.stat().st_mtime, reverse=True)
+            if matches:
+                result[name] = matches[0]
+        return result
 
-    if c4d_missing:
-        st.warning(f"Missing C4D renders: {', '.join(c4d_missing)}")
+    live_scenes = latest_c4d_scenes()
+    missing     = [n for n in ["Saxophone", "Piano", "Guitar"] if n not in live_scenes]
 
-    if c4d_existing:
-        cols = st.columns(len(c4d_existing))
-        for col, (name, path) in zip(cols, c4d_existing.items()):
+    if missing:
+        st.warning(f"Missing C4D renders: {', '.join(missing)}")
+
+    if live_scenes:
+        cols = st.columns(len(live_scenes))
+        for col, (name, path) in zip(cols, live_scenes.items()):
             with col:
-                st.image(str(path), caption=name, use_container_width=True)
+                # Guard: only show the image if the file actually exists on disk.
+                # Without this, Streamlit throws a MediaFileStorageError when
+                # config.py returns the placeholder path (_001) for a missing render.
+                if path.exists():
+                    try:
+                        # Read into bytes first — bypasses Streamlit's internal
+                        # file server, which fails on Windows paths with spaces.
+                        img_bytes = path.read_bytes()
+                        st.image(img_bytes, caption=name, use_container_width=True)
+                    except Exception:
+                        st.caption(f"{name} — render exists but can't display")
+                else:
+                    st.caption(f"{name} — no render yet")
 
     st.caption(f"C4D renders location: {C4D_RENDERS_DIR}")
     st.markdown("")
@@ -183,22 +209,50 @@ with st.expander("**STEP 1 — C4D Render** — Scene reference renders for Cont
     if not C4D_EXE.exists():
         st.error(f"Cinema 4D not found at: {C4D_EXE}")
     else:
-        st.markdown("**Launch Cinema 4D with a scene script** — C4D will open, run the script, and render. Close C4D when done.")
-        btn_cols = st.columns(4)
+        st.markdown(
+            "**Render C4D scenes** — open your combined project in C4D, then click a button below. "
+            "'All' renders every take (Saxophone / Piano / Guitar) in sequence."
+        )
 
-        for col, (scene_name, script_path) in zip(btn_cols, C4D_SCRIPTS.items()):
+        # Map each scene name to its render glob pattern (used to detect new files)
+        SCENE_PATTERNS = {
+            "Saxophone": "saxophone_model1_16x9_*.png",
+            "Piano":     "piano_grand_16x9_*.png",
+            "Guitar":    "guitar_16x9_*.png",
+        }
+
+        def wait_for_new_render(pattern: str, known: set, timeout: int = 300) -> bool:
+            """Polls the renders folder until a new file matching pattern appears."""
+            import time
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                matches = set(C4D_RENDERS_DIR.glob(pattern))
+                if matches - known:
+                    return True
+                time.sleep(2)
+            return False
+
+        individual = {k: v for k, v in C4D_SCRIPTS.items() if k != "All"}
+        btn_cols   = st.columns(len(individual))
+
+        # Individual scene buttons — each passes one script to the running C4D instance
+        for col, (scene_name, script_path) in zip(btn_cols, individual.items()):
             with col:
                 if st.button(f"▶ {scene_name}", key=f"c4d_launch_{scene_name}", use_container_width=True):
                     if not script_path.exists():
                         st.error(f"Script not found: {script_path.name}")
                     else:
-                        with st.spinner(f"Cinema 4D is open ({scene_name}) — close it when the render is done..."):
-                            subprocess.run(
-                                [str(C4D_EXE), "-script", str(script_path)],
-                                timeout=7200,
-                            )
-                        st.success(f"{scene_name} render done — check the preview above.")
+                        pattern  = SCENE_PATTERNS[scene_name]
+                        existing = set(C4D_RENDERS_DIR.glob(pattern))
+                        subprocess.Popen([str(C4D_EXE), "-script", str(script_path)])
+                        with st.spinner(f"Waiting for {scene_name} render..."):
+                            found = wait_for_new_render(pattern, existing)
+                        if found:
+                            st.success(f"{scene_name} render done.")
+                        else:
+                            st.error(f"{scene_name} timed out — check C4D for errors.")
                         st.rerun()
+
 
 
 # ────────────────────────────────────────────────────────────────────
@@ -292,6 +346,8 @@ with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", 
         if st.button("▶ Generate Copy Preview", key="run_copy_preview", use_container_width=True):
             rc, out = run_script("scripts/02b_generate_copy_preview.py")
             show_result(rc, out)
+            # Auto-expand the preview table after generating so you can see it immediately
+            st.session_state["copy_preview_expanded"] = True
             st.rerun()
 
     with col_apply:
@@ -309,7 +365,7 @@ with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", 
         with open(COPY_PREVIEW_JSON, encoding="utf-8") as f:
             cp = json.load(f)
 
-        with st.expander("Current copy preview", expanded=False):
+        with st.expander("Current copy preview", expanded=st.session_state.get("copy_preview_expanded", False)):
             # Helper: collapse product IDs down to their family name (sax / piano / guitar)
             FAMILY_LABEL = {"sax": "Saxophone", "piano": "Piano", "guitar": "Guitar"}
             def family_of(pid):
@@ -424,7 +480,7 @@ st.subheader("🚀 Run Full Pipeline")
 st.caption("Runs selected steps in sequence for your chosen market.")
 
 # ── Options ────────────────────────────────────────────────────────
-fp_col1, fp_col2, fp_col3, fp_col4, fp_col5 = st.columns([2, 1, 1, 1, 1])
+fp_col1, fp_col2, fp_col3, fp_col4 = st.columns([2, 1, 1, 1])
 with fp_col1:
     fp_market = st.selectbox("Market", all_markets, key="fp_market")
 with fp_col2:
@@ -436,13 +492,11 @@ with fp_col3:
 with fp_col4:
     fp_skip_copy = st.checkbox("Skip Copy",    value=True,  key="fp_skip_copy",
                                help="Uncheck to re-generate and apply copy before rendering.")
-with fp_col5:
-    fp_deliver   = st.checkbox("Include Deliver", value=False, key="fp_deliver")
 
 
 # ── Build ordered step list ────────────────────────────────────────
 # Each step is a dict — type "c4d" launches Cinema 4D, type "script" runs Python.
-def build_pipeline_steps(market, skip_c4d, skip_bg, skip_copy, include_deliver):
+def build_pipeline_steps(market, skip_c4d, skip_bg, skip_copy):
     steps = []
     if not skip_c4d:
         steps.append({"name": "C4D Renders", "type": "c4d",
@@ -461,14 +515,11 @@ def build_pipeline_steps(market, skip_c4d, skip_bg, skip_copy, include_deliver):
                       "script": "scripts/02c_apply_copy_preview.py",  "args": []})
     steps.append({"name": "AE Render", "type": "script",
                   "script": "scripts/03_populate_templates.py", "args": ["--market", market]})
-    if include_deliver:
-        steps.append({"name": "Deliver", "type": "script",
-                      "script": "scripts/05_deliver.py", "args": ["--market", market]})
     return steps
 
 
 # ── Step preview chips (show what will run before button is pressed) ─
-preview_steps = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_copy, fp_deliver)
+preview_steps = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_copy)
 if preview_steps:
     chip_cols = st.columns(len(preview_steps))
     for col, step in zip(chip_cols, preview_steps):
@@ -483,19 +534,41 @@ else:
 
 st.markdown("")
 
-# ── Run button ─────────────────────────────────────────────────────
-if preview_steps and st.button(
-    f"▶ Run Full Pipeline — {fp_market}",
-    key="run_full_pipeline",
-    use_container_width=True,
-    type="primary",
-):
-    steps  = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_copy, fp_deliver)
+# ── Run / Stop buttons ──────────────────────────────────────────────
+run_col, stop_col = st.columns([3, 1])
+
+with run_col:
+    run_clicked = preview_steps and st.button(
+        f"▶ Run Full Pipeline — {fp_market}",
+        key="run_full_pipeline",
+        use_container_width=True,
+        type="primary",
+    )
+
+with stop_col:
+    # Sets a flag — pipeline checks it between steps and halts.
+    # Note: can't interrupt a step mid-run; refresh the browser (F5) for an immediate stop.
+    if st.button("⏹ Stop", key="stop_pipeline", use_container_width=True):
+        st.session_state["pipeline_stop"] = True
+        st.info("Stop requested — pipeline will halt after the current step finishes.")
+
+if run_clicked:
+    # Clear any previous stop request when starting a new run
+    st.session_state["pipeline_stop"] = False
+
+    steps  = build_pipeline_steps(fp_market, fp_skip_c4d, fp_skip_bg, fp_skip_copy)
     n      = len(steps)
     all_ok = True
     progress_bar = st.progress(0, text="Starting pipeline...")
 
     for i, step in enumerate(steps):
+        # Check for stop request before starting each new step
+        if st.session_state.get("pipeline_stop"):
+            progress_bar.progress(int(i / n * 100), text="Stopped by user.")
+            st.warning(f"Pipeline stopped before step {i+1}: **{step['name']}**")
+            all_ok = False
+            break
+
         pct  = int(i / n * 100)
         name = step["name"]
         progress_bar.progress(pct, text=f"Step {i+1}/{n}: {name}...")

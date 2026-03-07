@@ -127,6 +127,13 @@ def deliver_locally(variants: list[dict], market_filter: str | None) -> tuple[in
         dest_name = f"{v['product_id']}_{v['market']}_{ratio_clean}.mp4"
         dest_path = dest_dir / dest_name
 
+        # Skip if already delivered — no need to re-copy an identical file
+        if dest_path.exists():
+            log.ok(f"  Already delivered — skipping: {dest_path.relative_to(DELIVERY_DIR)}")
+            v["status"] = "delivered"
+            success += 1
+            continue
+
         shutil.copy2(source, dest_path)
         log.ok(f"  Copied: {dest_path.relative_to(DELIVERY_DIR)}")
         v["status"] = "delivered"

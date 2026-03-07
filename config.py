@@ -115,7 +115,7 @@ C4D_SCRIPTS = {
     "Saxophone": Path(os.getenv("C4D_SCRIPT_SAX",   r"F:\Adobe_FDE Take-Home\Assets\Python_scripts\yosuki_saxophone_16x9.py")),
     "Piano":     Path(os.getenv("C4D_SCRIPT_PIANO", r"F:\Adobe_FDE Take-Home\Assets\Python_scripts\yosuki_piano_16x9.py")),
     "Guitar":    Path(os.getenv("C4D_SCRIPT_GUITAR",r"F:\Adobe_FDE Take-Home\Assets\Python_scripts\yosuki_guitar_16x9.py")),
-    "All":       Path(os.getenv("C4D_SCRIPT_ALL",   r"F:\Adobe_FDE Take-Home\Assets\Python_scripts\yosuki_c4d_pipeline_v3.py")),
+    "All":       Path(os.getenv("C4D_SCRIPT_ALL",   r"F:\Adobe_FDE Take-Home\Assets\Python_scripts\yosuki_render_takes.py")),
 }
 
 

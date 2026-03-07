@@ -40,14 +40,17 @@ for fid, fdata in families.items():
         pid_to_family[pid] = fid
 
 # ── Current US series_titles (kept as-is — only tagline + CTA change) ────────
-with open(VARIANTS_JSON, encoding="utf-8") as f:
-    existing_us = {}
-    for v in json.load(f):
-        pid = v["product_id"]
-        if pid not in existing_us:
-            existing_us[pid] = {
-                "series_title": v.get("series_title", ""),
-            }
+# variants.json may not exist yet on a fresh setup — that's fine, series_title
+# will just be empty until copy is applied for the first time.
+existing_us = {}
+if VARIANTS_JSON.exists():
+    with open(VARIANTS_JSON, encoding="utf-8") as f:
+        for v in json.load(f):
+            pid = v["product_id"]
+            if pid not in existing_us:
+                existing_us[pid] = {
+                    "series_title": v.get("series_title", ""),
+                }
 
 # ── CALL 1 — US CTAs (Claude generates; taglines are locked from brief) ───────
 # Build one line per family — pass the locked tagline so Claude can
@@ -61,6 +64,26 @@ for fid, fdata in families.items():
         f'  - family: "{fid}" | product_line: {fdata["label"]} | '
         f'locked_tagline: "{fdata["us_tagline"]}" | '
         f'key_messages: "{rep_product["key_message"]}" | vibe: "{rep_product["vibe"]}"'
+    )
+
+# Read previously generated CTAs so we can tell Claude to avoid repeating them.
+# This is what ensures you get something fresh on every click of "Generate".
+previous_ctas = {}
+if COPY_PREVIEW_JSON.exists():
+    with open(COPY_PREVIEW_JSON, encoding="utf-8") as f:
+        prev = json.load(f)
+    us_prev = prev.get("us", {})
+    for pid, c in us_prev.items():
+        fid = pid_to_family.get(pid)
+        if fid and fid not in previous_ctas and c.get("cta"):
+            previous_ctas[fid] = c["cta"]
+
+avoid_block = ""
+if previous_ctas:
+    avoid_lines = [f'  - {fid}: "{cta}"' for fid, cta in previous_ctas.items()]
+    avoid_block = (
+        "\nDO NOT repeat any of these previously used CTAs — write something different:\n"
+        + chr(10).join(avoid_lines) + "\n"
     )
 
 cta_prompt = f"""You are a senior copywriter for Yosuki Musical Instrument Corporation.
@@ -78,7 +101,7 @@ Rules:
 - Return ONLY a valid JSON array, no markdown:
 
 [{{"family":"...","cta":"..."}}]
-
+{avoid_block}
 PRODUCT FAMILIES:
 {chr(10).join(cta_lines)}"""
 
