@@ -389,7 +389,7 @@ with st.expander("**STEP 3 — Generate Copy** — Claude API copy generation", 
     with col_apply:
         st.markdown("**2. Apply to Variants** — writes approved copy into `variants.json` + creates intl variants")
         if COPY_PREVIEW_JSON.exists():
-            if st.button("✅ Apply Copy Preview", key="run_apply_copy", use_container_width=True, type="primary"):
+            if st.button("✅ Apply Copy", key="run_apply_copy", use_container_width=True, type="primary"):
                 rc, out = run_script("scripts/02c_apply_copy_preview.py")
                 show_result(rc, out)
                 st.rerun()
